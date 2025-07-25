@@ -1,0 +1,70 @@
+prefix: simplecontainer.io/v1
+kind: containers
+meta:
+  name: authentik
+  group: authentik
+  labels:
+    "traefik.enable": "true"
+    "traefik.http.routers.authentik.rule": "Host(`{{ .authentik.domain }}`)"
+    "traefik.http.routers.authentik.entrypoints": "web,websecure"
+    "traefik.http.routers.authentik.service": "authentik"
+    "traefik.http.routers.authentik.tls": "true"
+    "traefik.http.services.authentik.loadbalancer.server.port": "{{ .authentik.ports.authentik }}"
+    "traefik.http.middlewares.authentik.forwardauth.address": "http://bridge.authentik-authentik-1.private:{{ .authentik.ports.authentik }}/outpost.goauthentik.io/auth/traefik"
+    "traefik.http.middlewares.authentik.forwardauth.trustForwardHeader": "true"
+    "traefik.http.middlewares.authentik.forwardauth.authResponseHeaders": "X-authentik-username,X-authentik-groups,X-authentik-email,X-authentik-name,X-authentik-uid,X-authentik-jwt,X-authentik-meta-jwks,X-authentik-meta-outpost,X-authentik-meta-provider,X-authentik-meta-app,X-authentik-meta-version"
+spec:
+  image: "ghcr.io/goauthentik/server"
+  tag: "latest"
+  replicas: 1
+  args:
+    - server
+  ports:
+    - container: "{{ .authentik.ports.authentik }}"
+  envs:
+    - AUTHENTIK_SECRET_KEY=(( .secret ))
+    - AUTHENTIK_POSTGRESQL__HOST=bridge.authentik-pg-1.private
+    - AUTHENTIK_POSTGRESQL__USER=authentik
+    - AUTHENTIK_POSTGRESQL__NAME=authentik
+    - AUTHENTIK_POSTGRESQL__PASSWORD=(( .password ))
+    - AUTHENTIK_REDIS__HOST=bridge.authentik-redis-1.private
+  volumes:
+    - type: bind
+      hostPath: /home/{{ .user }}/.media
+      mountPoint: /media
+    - type: bind
+      hostPath: /home/{{ .user }}/.templates
+      mountPoint: /templates
+  configuration:
+    password: (( lookup "secret/authentik/credentials:postgres.password" | base64decode ))
+    secret: (( lookup "secret/authentik/credentials:secret.key" | base64decode ))
+---
+prefix: simplecontainer.io/v1
+kind: containers
+meta:
+  name: authentik-worker
+  group: authentik
+spec:
+  image: "ghcr.io/goauthentik/server"
+  tag: "latest"
+  replicas: 1
+  args:
+    - worker
+  envs:
+    - AUTHENTIK_WEB__PATH=/authentik/
+    - AUTHENTIK_SECRET_KEY=(( .secret ))
+    - AUTHENTIK_POSTGRESQL__HOST=bridge.authentik-pg-1.private
+    - AUTHENTIK_POSTGRESQL__USER=authentik
+    - AUTHENTIK_POSTGRESQL__NAME=authentik
+    - AUTHENTIK_POSTGRESQL__PASSWORD=(( .password ))
+    - AUTHENTIK_REDIS__HOST=bridge.authentik-redis-1.private
+  volumes:
+    - type: bind
+      hostPath: /home/{{ .user }}/.media
+      mountPoint: /media
+    - type: bind
+      hostPath: /home/{{ .user }}/.templates
+      mountPoint: /templates
+  configuration:
+    password: (( lookup "secret/authentik/credentials:postgres.password" | base64decode ))
+    secret: (( lookup "secret/authentik/credentials:secret.key" | base64decode ))

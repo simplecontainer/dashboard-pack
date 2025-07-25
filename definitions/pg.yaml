@@ -1,0 +1,30 @@
+prefix: simplecontainer.io/v1
+kind: containers
+meta:
+  name: pg
+  group: authentik
+spec:
+  image: "postgres"
+  tag: "15"
+  replicas: 1
+  envs:
+    - POSTGRES_USER=authentik
+    - POSTGRES_PASSWORD=(( .password ))
+    - POSTGRES_DB=authentik
+  volumes:
+    - type: bind
+      hostPath: /home/{{ .user }}/.pg
+      mountPoint: /var/lib/postgresql/data
+  configuration:
+    password: (( lookup "secret/authentik/credentials:postgres.password" | base64decode ))
+    secret: (( lookup "secret/authentik/credentials:secret.key" | base64decode ))
+---
+prefix: simplecontainer.io/v1
+kind: containers
+meta:
+  name: redis
+  group: authentik
+spec:
+  image: "redis"
+  tag: "alpine"
+  replicas: 1

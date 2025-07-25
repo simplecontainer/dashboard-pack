@@ -1,0 +1,25 @@
+kind: containers
+prefix: simplecontainer.io/v1
+meta:
+  name: dashboard-oss
+  group: dashboard
+  labels:
+    "traefik.enable": "true"
+    "traefik.http.routers.dashboard.rule": "Host(`{{ .dashboard.domain }}`) && PathPrefix(`/`)"
+    "traefik.http.routers.dashboard.entrypoints": "web,websecure"
+    "traefik.http.services.dashboard.loadbalancer.server.port": "{{ .dashboard.ports.dashboard }}"
+    "traefik.http.routers.dashboard.middlewares": "authentik@docker"
+    "traefik.http.routers.dashboard.tls": "true"
+spec:
+  image: "dashboard-oss"
+  tag: "latest"
+  replicas: 1
+  envs:
+    - PUBLIC_PROXY_DOMAIN=https://{{ .proxy.domains.proxy }}
+    - PUBLIC_PROXY_API_DOMAIN=https://{{ .proxy.domains.api }}
+  ports:
+    - container: "{{ .dashboard.ports.dashboard }}"
+  volumes:
+    - type: bind
+      hostPath: /home/{{ .user }}/.smrctl
+      mountPoint: /home/node/.smrctl

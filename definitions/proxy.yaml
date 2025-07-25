@@ -1,0 +1,29 @@
+kind: containers
+prefix: simplecontainer.io/v1
+meta:
+  name: proxy-manager-oss
+  group: dashboard
+  labels:
+    "traefik.enable": "true"
+    "traefik.http.routers.proxy.rule": "Host(`{{ .proxy.domains.proxy }}`) && PathPrefix(`/`)"
+    "traefik.http.routers.proxy.entrypoints": "web,websecure"
+    "traefik.http.routers.proxy.tls": "true"
+    "traefik.http.routers.proxy.service": "proxy"
+    "traefik.http.services.proxy.loadbalancer.server.port": "{{ .proxy.ports.proxy }}"
+    "traefik.http.routers.api.rule": "Host(`{{ .proxy.domains.api }}`) && PathPrefix(`/`)"
+    "traefik.http.routers.api.entrypoints": "web,websecure"
+    "traefik.http.routers.api.service": "api"
+    "traefik.http.routers.api.tls": "true"
+    "traefik.http.services.api.loadbalancer.server.port": "{{ .proxy.ports.api }}"
+spec:
+  image: "quay.io/simplecontainer/proxy-manager-oss"
+  tag: "latest"
+  replicas: 1
+  envs:
+    - MASTER_PORT={{ .proxy.ports.proxy }}
+    - PORT={{ .proxy.ports.api }}
+    - ENVIRONMENT=production
+    - ALLOW_ORIGIN_FROM=https://{{ .dashboard.domain }}
+  ports:
+    - container: "{{ .proxy.ports.proxy }}"
+    - container: "{{ .proxy.ports.api }}"

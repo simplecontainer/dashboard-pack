@@ -1,0 +1,8 @@
+prefix: simplecontainer.io/v1
+kind: volume
+meta:
+  group: authentik
+  name: pgdata
+spec:
+  data:
+    driver: local

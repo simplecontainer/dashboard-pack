@@ -1,0 +1,80 @@
+prefix: simplecontainer.io/v1
+kind: resource
+meta:
+  group: traefik
+  name: static-configuration
+spec:
+  data:
+
+    # ----------------------------
+    # Static Configuration (shared)
+    # ----------------------------
+    static-configuration: |
+      providers:
+        docker:
+          exposedByDefault: false
+
+        {{- if .traefik.localhost }}
+        file:
+          filename: /config/dynamic.yaml
+          watch: true
+        {{- end }}
+
+      entrypoints:
+        web:
+          address: ":80"
+          http:
+            redirections:
+              entryPoint:
+                to: websecure
+                scheme: https
+                permanent: true
+
+        websecure:
+          address: ":443"
+
+      {{- if not .traefik.localhost }}
+      certificatesResolvers:
+        myresolver:
+          acme:
+            tlschallenge: true
+            email: email@example.com
+            storage: /letsencrypt/acme.json
+      
+      api:
+        dashboard: false
+        insecure: false
+      {{ else }}
+      api:
+        dashboard: true
+        insecure: true
+      {{- end }}
+
+      log:
+        level: DEBUG
+      
+      accessLog: {}
+    # ----------------------------
+    # Localhost-specific settings
+    # ----------------------------
+    {{- if .traefik.localhost }}
+
+    dynamic.yaml: |
+      tls:
+        certificates:
+          - certFile: /certs/wildcard.certificate.pem
+            keyFile: /certs/wildcard.key.pem
+            stores:
+              - default
+        stores:
+          default:
+            defaultCertificate:
+              certFile: /certs/wildcard.certificate.pem
+              keyFile: /certs/wildcard.key.pem
+
+    {{- end }}
+
+    key: |
+      {{- .traefik.key | nindent 6 }}
+    certificate: |
+      {{- .traefik.certificate | nindent 6 }}

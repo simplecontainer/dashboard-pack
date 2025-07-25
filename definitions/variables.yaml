@@ -1,0 +1,24 @@
+user: ""
+
+authentik:
+  domain: "authentik.dashboard.localhost"
+  ports:
+    authentik: "9000"
+
+dashboard:
+  domain: "dashboard.localhost"
+  ports:
+    dashboard: "3000"
+
+proxy:
+  domains:
+    api: "api.dashboard.localhost"
+    proxy: "proxy.dashboard.localhost"
+  ports:
+    api: "5480"
+    proxy: "5443"
+
+traefik:
+  localhost: true
+  certificate: ""
+  key: ""
