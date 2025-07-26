@@ -12,7 +12,7 @@ meta:
     "traefik.http.routers.dashboard.tls": "true"
 spec:
   image: "dashboard-oss"
-  tag: "latest"
+  tag: "b8f02e3"
   replicas: 1
   envs:
     - PUBLIC_PROXY_DOMAIN=https://{{ .proxy.domains.proxy }}

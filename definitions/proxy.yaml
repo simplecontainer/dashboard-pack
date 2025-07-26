@@ -5,19 +5,40 @@ meta:
   group: dashboard
   labels:
     "traefik.enable": "true"
-    "traefik.http.routers.proxy.rule": "Host(`{{ .proxy.domains.proxy }}`) && PathPrefix(`/`)"
+
+    "traefik.http.routers.proxy.rule": "Host(`{{ .proxy.domains.proxy }}`) && PathPrefix(`/`) && !Method(`OPTIONS`)"
     "traefik.http.routers.proxy.entrypoints": "web,websecure"
     "traefik.http.routers.proxy.tls": "true"
+    "traefik.http.routers.proxy.middlewares": "authentik@docker"
     "traefik.http.routers.proxy.service": "proxy"
-    "traefik.http.services.proxy.loadbalancer.server.port": "{{ .proxy.ports.proxy }}"
-    "traefik.http.routers.api.rule": "Host(`{{ .proxy.domains.api }}`) && PathPrefix(`/`)"
+
+    "traefik.http.routers.proxy-options.rule": "Host(`{{ .proxy.domains.proxy }}`) && PathPrefix(`/`) && Method(`OPTIONS`)"
+    "traefik.http.routers.proxy-options.entrypoints": "web,websecure"
+    "traefik.http.routers.proxy-options.tls": "true"
+    "traefik.http.routers.proxy-options.service": "proxy"
+
+    "traefik.http.routers.api.rule": "Host(`{{ .proxy.domains.api }}`) && PathPrefix(`/`) && !Method(`OPTIONS`)"
     "traefik.http.routers.api.entrypoints": "web,websecure"
     "traefik.http.routers.api.service": "api"
+    "traefik.http.routers.api.middlewares": "authentik@docker"
     "traefik.http.routers.api.tls": "true"
+
+    "traefik.http.routers.api-options.rule": "Host(`{{ .proxy.domains.api }}`) && PathPrefix(`/`) && Method(`OPTIONS`)"
+    "traefik.http.routers.api-options.entrypoints": "web,websecure"
+    "traefik.http.routers.api-options.tls": "true"
+    "traefik.http.routers.api-options.service": "api"
+
+    "traefik.http.routers.proxy.priority": "10"
+    "traefik.http.routers.proxy-options.priority": "100"
+
+    "traefik.http.routers.api.priority": "10"
+    "traefik.http.routers.api-options.priority": "100"
+
+    "traefik.http.services.proxy.loadbalancer.server.port": "{{ .proxy.ports.proxy }}"
     "traefik.http.services.api.loadbalancer.server.port": "{{ .proxy.ports.api }}"
 spec:
-  image: "quay.io/simplecontainer/proxy-manager-oss"
-  tag: "latest"
+  image: "proxy-manager-oss"
+  tag: "09b0ac4"
   replicas: 1
   envs:
     - MASTER_PORT={{ .proxy.ports.proxy }}

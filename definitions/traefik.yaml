@@ -17,7 +17,6 @@ spec:
     - container: "443"
       host: "443"
     - container: "8080"
-      host: "8080"
   resources:
     - group: "traefik"
       name: "static-configuration"
