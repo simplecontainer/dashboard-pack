@@ -6,3 +6,12 @@ meta:
 spec:
   data:
     driver: local
+---
+prefix: simplecontainer.io/v1
+kind: volume
+meta:
+  group: authentik
+  name: media
+spec:
+  data:
+    driver: local

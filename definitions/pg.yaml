@@ -12,8 +12,8 @@ spec:
     - POSTGRES_PASSWORD=(( .password ))
     - POSTGRES_DB=authentik
   volumes:
-    - type: bind
-      hostPath: /home/{{ .user }}/.pg
+    - type: volume
+      name: pgdata
       mountPoint: /var/lib/postgresql/data
   configuration:
     password: (( lookup "secret/authentik/credentials:postgres.password" | base64decode ))

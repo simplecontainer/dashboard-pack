@@ -29,15 +29,17 @@ spec:
     - AUTHENTIK_POSTGRESQL__PASSWORD=(( .password ))
     - AUTHENTIK_REDIS__HOST=bridge.authentik-redis-1.private
   volumes:
-    - type: bind
-      hostPath: /home/{{ .user }}/.media
+    - type: volume
+      name: media
       mountPoint: /media
-    - type: bind
-      hostPath: /home/{{ .user }}/.templates
-      mountPoint: /templates
   configuration:
     password: (( lookup "secret/authentik/credentials:postgres.password" | base64decode ))
     secret: (( lookup "secret/authentik/credentials:secret.key" | base64decode ))
+  resources:
+    - group: "authentik"
+      name: "blueprint"
+      key: simplecontainer
+      mountPoint: /blueprints/default/simplecontainer.yaml
 ---
 prefix: simplecontainer.io/v1
 kind: containers
@@ -68,3 +70,8 @@ spec:
   configuration:
     password: (( lookup "secret/authentik/credentials:postgres.password" | base64decode ))
     secret: (( lookup "secret/authentik/credentials:secret.key" | base64decode ))
+  resources:
+    - group: "authentik"
+      name: "blueprint"
+      key: simplecontainer
+      mountPoint: /blueprints/default/simplecontainer.yaml
