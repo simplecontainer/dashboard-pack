@@ -11,8 +11,8 @@ meta:
     "traefik.http.routers.dashboard.middlewares": "authentik@docker"
     "traefik.http.routers.dashboard.tls": "true"
 spec:
-  image: "dashboard-oss"
-  tag: "6c97d69"
+  image: "quay.io/simplecontainer/dashboard-oss"
+  tag: "latest"
   replicas: 1
   envs:
     - PUBLIC_PROXY_DOMAIN=https://{{ .proxy.domains.proxy }}

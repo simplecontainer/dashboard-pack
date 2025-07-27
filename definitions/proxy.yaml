@@ -37,8 +37,8 @@ meta:
     "traefik.http.services.proxy.loadbalancer.server.port": "{{ .proxy.ports.proxy }}"
     "traefik.http.services.api.loadbalancer.server.port": "{{ .proxy.ports.api }}"
 spec:
-  image: "proxy-manager-oss"
-  tag: "09b0ac4"
+  image: "quay.io/simplecontainer/proxy-manager-oss"
+  tag: "latest"
   replicas: 1
   envs:
     - MASTER_PORT={{ .proxy.ports.proxy }}
